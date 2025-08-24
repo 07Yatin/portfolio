@@ -11,18 +11,34 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 
 function Resume() {
   const [width, setWidth] = useState(1200);
-  const [numPages, setNumPages] = useState(null);
+  // Remove unused: const [numPages, setNumPages] = useState(null);
   const [pageError, setPageError] = useState(null);
   const [pdfLoadingState, setPdfLoadingState] = useState('initial');
 
   useEffect(() => {
     setWidth(window.innerWidth);
+
+    const checkPdfFile = async () => {
+      try {
+        const response = await fetch(pdf);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const blob = await response.blob();
+        console.log('PDF file size:', blob.size, 'bytes');
+        setPdfLoadingState('file_exists');
+      } catch (error) {
+        console.error('PDF file fetch error:', error);
+        setPdfLoadingState('file_error');
+        setPageError(error.toString());
+      }
+    };
+
+    checkPdfFile();
   }, []);
 
-  function onDocumentLoadSuccess({ numPages }) {
-    setNumPages(numPages);
+  function onDocumentLoadSuccess() {
     setPdfLoadingState('loaded');
-    console.log("PDF loaded successfully, total pages:", numPages);
   }
 
   function onDocumentLoadError(error) {
@@ -61,21 +77,17 @@ function Resume() {
                     <p>PDF Loading State: {pdfLoadingState}</p>
                   </div>
                 )}
-                <Document 
-                  file={pdf}
-                  onLoadSuccess={onDocumentLoadSuccess}
-                  onLoadError={onDocumentLoadError}
-                  loading={() => <div>Loading PDF...</div>}
-                >
-                  <Page 
-                    pageNumber={1} 
-                    width={Math.min(width * 0.8, 800)} 
-                    renderTextLayer={false}
-                    renderAnnotationLayer={false}
-                  />
-                </Document>
+                {pdfLoadingState === 'loaded' && (
+                  <Document
+                    file={pdf}
+                    onLoadSuccess={onDocumentLoadSuccess}
+                    onLoadError={onDocumentLoadError}
+                  >
+                    <Page pageNumber={1} scale={width > 786 ? 1.6 : 0.4} />
+                  </Document>
+                )}
               </div>
-              <div className="d-flex justify-content-center mt-3">
+              <div className="d-flex justify-content-center">
                 <Button variant="primary" href={pdf} target="_blank">
                   <AiOutlineDownload />
                   &nbsp;Download Resume
