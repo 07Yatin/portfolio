@@ -12,41 +12,11 @@
   ],
   "routes": [
     {
-      "src": "^/static/(.*)",
-      "headers": {
-        "cache-control": "max-age=31536000, immutable"
-      }
-    },
-    {
-      "src": "^/(.*\\.(?:js|css|png|jpg|pdf|ico))",
-      "headers": {
-        "cache-control": "max-age=31536000, immutable"
-      }
-    },
-    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
   ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'"
-        }
-      ]
-    }
-  ],
-  "compression": true,
-  "cleanUrls": true
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
+  "framework": "create-react-app"
 }
